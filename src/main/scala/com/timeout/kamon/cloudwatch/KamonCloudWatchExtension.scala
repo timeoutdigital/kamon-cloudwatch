@@ -13,7 +13,9 @@ class KamonCloudWatchExtension(system: ExtendedActorSystem) extends Kamon.Extens
   val log = Logging(system, classOf[KamonCloudWatchExtension])
   log.info("Starting the Kamon CloudWatch extension")
 
-  val shipper: ActorRef = system.actorOf(MetricsShipper.props(), "cloudwatch-metrics-shipper")
+  implicit val ec = system.dispatcher
+
+  val shipper: ActorRef = system.actorOf(MetricsShipper.props, "cloudwatch-metrics-shipper")
   val subscriber: ActorRef = system.actorOf(MetricsLogger.props(shipper), "cloudwatch-metrics-logger")
 
   subscriptions.entrySet.asScala.foreach { entry =>

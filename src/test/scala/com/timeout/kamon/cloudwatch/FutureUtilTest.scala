@@ -7,7 +7,6 @@ import com.timeout.kamon.cloudwatch.FutureUtils.FutureOps
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationLong
-import java.util.Random
 
 
 class FutureUtilTest extends FreeSpec with Matchers {

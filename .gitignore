@@ -1,5 +1,6 @@
+<<<<<<< HEAD
 ### Scala template
 *.class
 *.log
-/target
+target/
 project/

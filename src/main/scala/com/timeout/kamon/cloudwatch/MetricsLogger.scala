@@ -18,8 +18,8 @@ class MetricsLogger(shipper: ActorRef) extends Actor with ActorLogging {
 
   override def receive: Receive = LoggingReceive {
     case tick: TickMetricSnapshot =>
-      datums(tick).flatten.sliding(batchSize, batchSize).foreach { data =>
-        // allow a latch to ony log the metrics without pushing out onto Cloudwatch
+      data(tick).sliding(batchSize, batchSize).foreach { data =>
+        // allow a latch to only log the metrics without pushing out onto Cloudwatch
         data.foreach(d => log.debug(d.toString))
         if (!KamonSettings.logOnly) shipper ! ShipMetrics(data)
       }
@@ -33,13 +33,12 @@ class MetricsLogger(shipper: ActorRef) extends Actor with ActorLogging {
     * https://github.com/philwill-nap/Kamon/blob/master/kamon-cloudwatch/
     * src/main/scala/kamon/cloudwatch/CloudWatchMetricsSender.scala
     */
-  private def datums(tick: TickMetricSnapshot): List[List[MetricDatum]] = {
+  private def data(tick: TickMetricSnapshot): List[MetricDatum] = {
     for {
       (groupIdentity, groupSnapshot) <- tick.metrics
       groupDimension = new Dimension().withName(groupIdentity.category).withValue(groupIdentity.name)
       groupDimensions = List(groupDimension).asJava
       (metricIdentity, metricSnapshot) <- groupSnapshot.metrics
-      datum = new MetricDatum().withDimensions(groupDimensions).withMetricName(metricIdentity.name).withTimestamp(new Date())
     } yield {
       val (unit, correctionFactor) = metricIdentity.unitOfMeasurement match {
         case Time.Nanoseconds => StandardUnit.Microseconds -> 1E-3
@@ -52,6 +51,11 @@ class MetricsLogger(shipper: ActorRef) extends Actor with ActorLogging {
         case Memory.GigaBytes => StandardUnit.Gigabytes -> 1.0
         case _ => StandardUnit.Count -> 1.0
       }
+
+      val datum = new MetricDatum()
+        .withDimensions(groupDimensions)
+        .withMetricName(metricIdentity.name)
+        .withTimestamp(new Date())
 
       metricSnapshot match {
         case hs: Histogram.Snapshot if hs.numberOfMeasurements > 0 =>
@@ -68,7 +72,7 @@ class MetricsLogger(shipper: ActorRef) extends Actor with ActorLogging {
         case _ => List.empty
       }
     }
-  }.toList
+  }.toList.flatten
 }
 
 object MetricsLogger {

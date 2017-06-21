@@ -1,6 +1,6 @@
 name := "kamon-cloudwatch"
 
-name := "0.1"
+version := "0.0.1"
 
 organization := "com.timeout"
 
@@ -22,8 +22,8 @@ val akkaVersion = "2.4.19"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % akkaVersion
 
-libraryDependencies += "io.kamon" %% "kamon-core" % "0.6.7"
+libraryDependencies += "io.kamon" %% "kamon-core" % "0.6.7" exclude ("com.typesafe.akka", "akka-actor_2.11")
 
-libraryDependencies += "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.133"
+libraryDependencies += "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.151"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % "test"

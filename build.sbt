@@ -14,6 +14,10 @@ crossScalaVersions := Seq("2.11.8", "2.12.2")
 
 credentials += Credentials(Path.userHome / ".bintray" / ".credentials")
 
+bintrayOrganization := Some("timeoutdigital")
+
+bintrayRepository := "releases"
+
 lazy val root = (project in file(".")).settings(
   fork in Test := true
 )

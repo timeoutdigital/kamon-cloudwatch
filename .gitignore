@@ -1,5 +1,1 @@
-### Scala template
-*.class
-*.log
-/target
-project/
+target/

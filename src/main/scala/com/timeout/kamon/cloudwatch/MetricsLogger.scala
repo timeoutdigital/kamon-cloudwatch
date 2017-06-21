@@ -5,6 +5,7 @@ import java.util.Date
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.event.LoggingReceive
 import com.amazonaws.services.cloudwatch.model._
+import com.timeout.kamon.cloudwatch.AmazonAsync.MetricDatumBatch
 import com.timeout.kamon.cloudwatch.KamonSettings.batchSize
 import kamon.metric.SubscriptionsDispatcher.TickMetricSnapshot
 import kamon.metric.instrument.{Counter, Histogram, Memory, Time}
@@ -33,7 +34,7 @@ class MetricsLogger(shipper: ActorRef) extends Actor with ActorLogging {
     * https://github.com/philwill-nap/Kamon/blob/master/kamon-cloudwatch/
     * src/main/scala/kamon/cloudwatch/CloudWatchMetricsSender.scala
     */
-  private def data(tick: TickMetricSnapshot): List[MetricDatum] = {
+  private def data(tick: TickMetricSnapshot): MetricDatumBatch = {
     for {
       (groupIdentity, groupSnapshot) <- tick.metrics
       groupDimension = new Dimension().withName(groupIdentity.category).withValue(groupIdentity.name)

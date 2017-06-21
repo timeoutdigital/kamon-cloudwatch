@@ -11,7 +11,7 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.cloudwatch.model.{MetricDatum, PutMetricDataResult}
 import com.amazonaws.services.cloudwatch.{AmazonCloudWatchAsync, AmazonCloudWatchAsyncClientBuilder}
 import com.timeout.kamon.cloudwatch.KamonSettings.region
-import com.timeout.kamon.cloudwatch.AmazonAsync.MetricsAsyncOps
+import com.timeout.kamon.cloudwatch.AmazonAsync.{MetricDatumBatch, MetricsAsyncOps}
 
 import scala.concurrent.ExecutionContext
 
@@ -48,4 +48,4 @@ object MetricsShipper {
   def props(implicit ec: ExecutionContext): Props = Props(new MetricsShipper)
 }
 
-final case class ShipMetrics(datums: List[MetricDatum])
+final case class ShipMetrics(datums: MetricDatumBatch)

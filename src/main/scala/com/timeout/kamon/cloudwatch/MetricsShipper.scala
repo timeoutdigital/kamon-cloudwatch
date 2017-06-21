@@ -11,7 +11,7 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.cloudwatch.model.{MetricDatum, PutMetricDataResult}
 import com.amazonaws.services.cloudwatch.{AmazonCloudWatchAsync, AmazonCloudWatchAsyncClientBuilder}
 import com.timeout.kamon.cloudwatch.KamonSettings.region
-import com.timeout.kamon.cloudwatch.MetricsAsyncOps.putMetricDataAsync
+import com.timeout.kamon.cloudwatch.AmazonAsync.MetricsAsyncOps
 
 import scala.concurrent.ExecutionContext
 
@@ -37,8 +37,8 @@ class MetricsShipper(implicit ec: ExecutionContext) extends Actor with ActorLogg
     ).build()
 
   override def receive: Receive = LoggingReceive {
-    case ShipMetrics(metrics) => putMetricDataAsync(metrics).pipeTo(self)
-    case msg: PutMetricDataResult => log.debug(s"Success: pushed metrics to Cloudwatch: $msg")
+    case ShipMetrics(metrics) => metrics.put.pipeTo(self)
+    case msg: PutMetricDataResult => log.debug(s"Succeeded to push metrics to Cloudwatch: $msg")
     case Failure(t) => log.warning(s"Failed to send metrics to Cloudwatch ${t.getMessage}")
     case msg => log.warning(s"Unsupported message $msg received in MetricsShipper")
   }

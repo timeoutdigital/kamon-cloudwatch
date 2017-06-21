@@ -20,9 +20,9 @@ class KamonCloudWatchExtension(system: ExtendedActorSystem) extends Kamon.Extens
   val subscriber: ActorRef = system.actorOf(MetricsLogger.props(shipper), "cloudwatch-metrics-logger")
 
   // loop through patterns to register
-  subscriptions.foreach { entry => entry._2.foreach { pattern =>
-      log.info(s"""Subscribing to category "${entry._1}" pattern "$pattern"""")
-      Kamon.metrics.subscribe(entry._1, pattern, subscriber, permanently = true)
+  subscriptions.foreach { case (category, confList) => confList.foreach { pattern =>
+      log.info(s"""Subscribing to category "$category" pattern "$pattern"""")
+      Kamon.metrics.subscribe(category, pattern, subscriber, permanently = true)
     }
   }
 }

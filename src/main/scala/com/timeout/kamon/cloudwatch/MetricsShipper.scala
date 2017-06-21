@@ -8,7 +8,7 @@ import akka.event.LoggingReceive
 import akka.pattern.pipe
 import com.amazonaws.client.builder.ExecutorFactory
 import com.amazonaws.regions.Regions
-import com.amazonaws.services.cloudwatch.model.{MetricDatum, PutMetricDataResult}
+import com.amazonaws.services.cloudwatch.model.PutMetricDataResult
 import com.amazonaws.services.cloudwatch.{AmazonCloudWatchAsync, AmazonCloudWatchAsyncClientBuilder}
 import com.timeout.kamon.cloudwatch.KamonSettings.region
 import com.timeout.kamon.cloudwatch.AmazonAsync.{MetricDatumBatch, MetricsAsyncOps}

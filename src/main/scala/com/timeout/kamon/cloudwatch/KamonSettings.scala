@@ -13,7 +13,7 @@ object KamonSettings {
       entry.getKey -> entry.getValue.asInstanceOf[ConfigList].unwrapped.asScala.map(_.asInstanceOf[String])
     }
 
-  private[cloudwatch] val nameSpace = cloudWatchConfig.getString("name-space")
+  private[cloudwatch] val nameSpace = cloudWatchConfig.getString("namespace")
   private[cloudwatch] val region = cloudWatchConfig.getString("region")
   private[cloudwatch] val batchSize = cloudWatchConfig.getInt("batch-size")
   private[cloudwatch] val logOnly = cloudWatchConfig.getBoolean("log-metrics-only")

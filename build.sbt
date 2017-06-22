@@ -1,16 +1,16 @@
 name := "kamon-cloudwatch"
 
-version := "0.0.1"
+version := "0.0.2-SNAPSHOT"
 
 organization := "com.timeout"
 
 releaseCrossBuild := true
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
-crossScalaVersions := Seq("2.11.8", "2.12.2")
+crossScalaVersions := Seq("2.11.11", "2.12.2")
 
 credentials += Credentials(Path.userHome / ".bintray" / ".credentials")
 

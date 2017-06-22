@@ -16,6 +16,6 @@ object KamonSettings {
   private[cloudwatch] val nameSpace = cloudWatchConfig.getString("namespace")
   private[cloudwatch] val region = cloudWatchConfig.getString("region")
   private[cloudwatch] val batchSize = cloudWatchConfig.getInt("batch-size")
-  private[cloudwatch] val logOnly = cloudWatchConfig.getBoolean("log-metrics-only")
+  private[cloudwatch] val disabled= cloudWatchConfig.getBoolean("disable-send")
   private[cloudwatch] val numThreads = cloudWatchConfig.getInt("async-threads")
 }

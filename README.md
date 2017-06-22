@@ -41,7 +41,7 @@ kamon {
     batch-size = 20
 
     # only logs metrics to file without shipping out to Cloudwatch
-    log-metrics-only = false
+    disable-send = false
 
     # how many threads will be assigned to the pool that does the shipment of metrics
     async-threads = 5

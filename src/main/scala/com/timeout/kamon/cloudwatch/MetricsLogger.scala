@@ -21,7 +21,7 @@ class MetricsLogger(shipper: ActorRef) extends Actor with ActorLogging {
     case tick: TickMetricSnapshot =>
       data(tick).sliding(batchSize, batchSize).foreach { data =>
         // allow a latch to only log the metrics without pushing out onto Cloudwatch
-        if (KamonSettings.disabled) log.info(data.mkString(", ")) //TODO print pretty json
+        if (!KamonSettings.sendMetrics) log.debug(data.mkString(", ")) //TODO print pretty json
         else shipper ! ShipMetrics(data)
       }
 

@@ -14,8 +14,6 @@ crossScalaVersions := Seq("2.11.11", "2.12.2")
 
 credentials += Credentials(Path.userHome / ".bintray" / ".credentials")
 
-releaseTagName += version
-
 bintrayOrganization := Some("timeoutdigital")
 
 bintrayRepository := "releases"

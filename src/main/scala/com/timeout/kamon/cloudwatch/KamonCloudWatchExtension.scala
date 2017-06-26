@@ -12,8 +12,8 @@ import scala.concurrent.ExecutionContextExecutor
   * Register pattern subscriptions with underlying subscriber actor
   */
 class KamonCloudWatchExtension(system: ExtendedActorSystem) extends Kamon.Extension {
-  implicit val ec: ExecutionContextExecutor = system.dispatcher
-  protected val log = Logging(system, classOf[KamonCloudWatchExtension])
+  private implicit val ec: ExecutionContextExecutor = system.dispatcher
+  private val log = Logging(system, classOf[KamonCloudWatchExtension])
   log.info("Starting the Kamon CloudWatch extension")
 
   val shipper: ActorRef = system.actorOf(MetricsShipper.props, "cloudwatch-metrics-shipper")

@@ -21,8 +21,8 @@ class MetricsLogger(shipper: ActorRef) extends Actor with ActorLogging {
     case tick: TickMetricSnapshot =>
       data(tick).sliding(batchSize, batchSize).foreach { data =>
         // allow a latch to only log the metrics without pushing out onto Cloudwatch
-        data.foreach(d => log.debug(d.toString))
-        if (!KamonSettings.logOnly) shipper ! ShipMetrics(data)
+        if (!KamonSettings.sendMetrics) log.debug(data.mkString(", ")) //TODO print pretty json
+        else shipper ! ShipMetrics(data)
       }
 
     case msg => log.warning(s"Unsupported message $msg received in MetricsLogger")

@@ -40,8 +40,8 @@ kamon {
     # batch size of data when send to Cloudwatch    
     batch-size = 20
 
-    # only logs metrics to file without shipping out to Cloudwatch
-    log-metrics-only = false
+    # only logs metrics to file without shipping out to Cloudwatch if it is false
+    send-metrics = true
 
     # how many threads will be assigned to the pool that does the shipment of metrics
     async-threads = 5
@@ -75,3 +75,6 @@ kamon {
 # AWS Cloudwatch Example
 - log on to Cloudwatch, the metrics will be appearing on 'Custom namespaces' section under "Metrics" menu, i.e.:
 ![alt text](https://github.com/timeoutdigital/kamon-cloudwatch/blob/master/doc/cloundwatch-metrics.png "what has showed up in Cloudwatch")
+
+# License
+- [MIT](https://github.com/timeoutdigital/kamon-cloudwatch/blob/master/LICENSE "MIT")

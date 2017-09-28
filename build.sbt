@@ -10,7 +10,7 @@ scalaVersion := "2.11.11"
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
-crossScalaVersions := Seq("2.11.11", "2.12.2")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.3")
 
 credentials += Credentials(Path.userHome / ".bintray" / ".credentials")
 
@@ -22,11 +22,7 @@ lazy val root = (project in file(".")).settings(
   fork in Test := true
 )
 
-val akkaVersion = "2.4.19"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % akkaVersion
-
-libraryDependencies += "io.kamon" %% "kamon-core" % "1.0.0-RC1" exclude ("com.typesafe.akka", "akka-actor_2.11")
+libraryDependencies += "io.kamon" %% "kamon-core" % "1.0.0-RC1"
 
 libraryDependencies += "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.151"
 

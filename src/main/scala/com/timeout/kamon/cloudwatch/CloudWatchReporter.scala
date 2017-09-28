@@ -135,10 +135,11 @@ class CloudWatchReporter extends MetricReporter {
         .withValue(metric.value.toDouble * scale)
     }
 
-    (snapshot.metrics.histograms.map(datumFromDistribution) ++
-      snapshot.metrics.minMaxCounters.map(datumFromDistribution) ++
-      snapshot.metrics.gauges.map(datumFromValue) ++
-       snapshot.metrics.counters.map(datumFromValue))
-      .toList
+    val allDatums =
+      snapshot.metrics.histograms.view.map(datumFromDistribution) ++
+      snapshot.metrics.minMaxCounters.view.map(datumFromDistribution) ++
+      snapshot.metrics.gauges.view.map(datumFromValue) ++
+      snapshot.metrics.counters.view.map(datumFromValue)
+    allDatums.toVector
   }
 }

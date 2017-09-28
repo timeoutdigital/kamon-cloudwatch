@@ -14,7 +14,7 @@ import scala.util.Try
 
 object AmazonAsync {
 
-  type MetricDatumBatch = List[MetricDatum]
+  type MetricDatumBatch = Vector[MetricDatum]
 
   def asyncRequest[Arg, Req <: AmazonWebServiceRequest, Res](asyncArg: Arg)
   (asyncOp: (Arg, AsyncHandler[Req, Res]) => concurrent.Future[Res]): Future[Res] = {

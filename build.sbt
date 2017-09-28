@@ -26,7 +26,7 @@ val akkaVersion = "2.4.19"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % akkaVersion
 
-libraryDependencies += "io.kamon" %% "kamon-core" % "0.6.7" exclude ("com.typesafe.akka", "akka-actor_2.11")
+libraryDependencies += "io.kamon" %% "kamon-core" % "1.0.0-RC1" exclude ("com.typesafe.akka", "akka-actor_2.11")
 
 libraryDependencies += "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.151"
 

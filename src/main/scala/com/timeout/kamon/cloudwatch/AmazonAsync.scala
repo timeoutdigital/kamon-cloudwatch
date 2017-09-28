@@ -7,12 +7,10 @@ import com.amazonaws.{AmazonWebServiceRequest, AmazonWebServiceResult, ResponseM
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsync
 import com.amazonaws.services.cloudwatch.model.{MetricDatum, PutMetricDataRequest}
-import com.timeout.kamon.cloudwatch.KamonSettings.nameSpace
 
 import scala.collection.JavaConverters._
 import scala.concurrent.{Future, Promise}
 import scala.util.Try
-
 
 object AmazonAsync {
 
@@ -33,7 +31,7 @@ object AmazonAsync {
 
   implicit class MetricsAsyncOps(data: MetricDatumBatch) {
 
-    def put(implicit client: AmazonCloudWatchAsync): Future[AmazonWebServiceResult[ResponseMetadata]] =
+    def put(nameSpace: String)(implicit client: AmazonCloudWatchAsync): Future[AmazonWebServiceResult[ResponseMetadata]] =
       asyncRequest(new PutMetricDataRequest()
         .withNamespace(nameSpace)
         .withMetricData(data.asJava))(client.putMetricDataAsync)

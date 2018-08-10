@@ -6,18 +6,16 @@ releaseCrossBuild := true
 
 licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
-credentials += Credentials(Path.userHome / ".bintray" / ".credentials")
+//credentials += Credentials(Path.userHome / ".bintray" / ".credentials")
 
-bintrayOrganization := Some("timeoutdigital")
+//bintrayOrganization := Some("timeoutdigital")
 
-bintrayRepository := "releases"
+//bintrayRepository := "releases"
 
-lazy val root = (project in file(".")).settings(
-  fork in Test := true
+libraryDependencies ++= Seq(
+  "io.kamon"      %% "kamon-core"              % "1.1.3",
+  "com.amazonaws" %  "aws-java-sdk-cloudwatch" % "1.11.384",
+  "org.scalatest" %% "scalatest"               % "3.0.5" % "test"
 )
 
-libraryDependencies += "io.kamon" %% "kamon-core" % "1.0.0-RC1"
-
-libraryDependencies += "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.151"
-
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % "test"
+fork in Test := true

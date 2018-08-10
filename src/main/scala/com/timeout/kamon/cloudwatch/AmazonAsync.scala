@@ -16,8 +16,8 @@ object AmazonAsync {
 
   type MetricDatumBatch = Vector[MetricDatum]
 
-  def asyncRequest[Arg, Req <: AmazonWebServiceRequest, Res](asyncArg: Arg)
-  (asyncOp: (Arg, AsyncHandler[Req, Res]) => concurrent.Future[Res]): Future[Res] = {
+  private def asyncRequest[Arg, Req <: AmazonWebServiceRequest, Res](asyncArg: Arg)
+      (asyncOp: (Arg, AsyncHandler[Req, Res]) => concurrent.Future[Res]): Future[Res] = {
 
     val promise: Promise[Res] = Promise[Res]
     val handler = new AsyncHandler[Req, Res] {

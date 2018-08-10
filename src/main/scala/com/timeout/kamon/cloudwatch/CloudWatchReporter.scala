@@ -4,13 +4,10 @@ import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
 
 import com.typesafe.config.Config
-
 import com.amazonaws.services.cloudwatch.model._
 import com.timeout.kamon.cloudwatch.AmazonAsync.MetricDatumBatch
-
 import kamon.{Kamon, MetricReporter, Tags}
-import kamon.metric.{TickSnapshot, MetricDistribution, MetricValue, MeasurementUnit}
-
+import kamon.metric.{MeasurementUnit, MetricDistribution, MetricValue, PeriodSnapshot}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -50,7 +47,7 @@ class CloudWatchReporter extends MetricReporter {
     }
   }
 
-  override def reportTickSnapshot(snapshot: TickSnapshot): Unit = {
+  override def reportPeriodSnapshot(snapshot: PeriodSnapshot): Unit = {
     val config = configuration.get
 
     if (config.sendMetrics) {
@@ -76,28 +73,28 @@ class CloudWatchReporter extends MetricReporter {
     * https://github.com/philwill-nap/Kamon/blob/master/kamon-cloudwatch/
     * src/main/scala/kamon/cloudwatch/CloudWatchMetricsSender.scala
     */
-  private def datums(snapshot: TickSnapshot): MetricDatumBatch = {
+  private def datums(snapshot: PeriodSnapshot): MetricDatumBatch = {
     def unitAndScale(unit: MeasurementUnit): (StandardUnit, Double) = {
       import MeasurementUnit.Dimension._
       import MeasurementUnit.{information, time}
 
       unit.dimension match {
-        case Time if unit.magnitude == time.seconds =>
+        case Time if unit.magnitude == time.seconds.magnitude =>
           StandardUnit.Seconds -> 1.0
-        case Time if unit.magnitude == time.milliseconds =>
+        case Time if unit.magnitude == time.milliseconds.magnitude =>
           StandardUnit.Milliseconds -> 1.0
-        case Time if unit.magnitude == time.microseconds =>
+        case Time if unit.magnitude == time.microseconds.magnitude =>
           StandardUnit.Microseconds -> 1.0
-        case Time if unit.magnitude == time.nanoseconds =>
+        case Time if unit.magnitude == time.nanoseconds.magnitude =>
           StandardUnit.Microseconds -> 1E-3
 
-        case Information if unit.magnitude == information.bytes =>
+        case Information if unit.magnitude == information.bytes.magnitude =>
           StandardUnit.Bytes -> 1.0
-        case Information if unit.magnitude == information.kilobytes =>
+        case Information if unit.magnitude == information.kilobytes.magnitude =>
           StandardUnit.Kilobytes -> 1.0
-        case Information if unit.magnitude == information.megabytes =>
+        case Information if unit.magnitude == information.megabytes.magnitude =>
           StandardUnit.Megabytes -> 1.0
-        case Information if unit.magnitude == information.gigabytes =>
+        case Information if unit.magnitude == information.gigabytes.magnitude =>
           StandardUnit.Gigabytes -> 1.0
 
         case _ => StandardUnit.Count -> 1.0
@@ -137,9 +134,10 @@ class CloudWatchReporter extends MetricReporter {
 
     val allDatums =
       snapshot.metrics.histograms.view.map(datumFromDistribution) ++
-      snapshot.metrics.minMaxCounters.view.map(datumFromDistribution) ++
+      snapshot.metrics.rangeSamplers.map(datumFromDistribution) ++
       snapshot.metrics.gauges.view.map(datumFromValue) ++
       snapshot.metrics.counters.view.map(datumFromValue)
+
     allDatums.toVector
   }
 }

@@ -1,13 +1,16 @@
 package com.timeout.kamon.cloudwatch
 
+import java.time.{Clock, Instant}
 import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
 
 import com.typesafe.config.Config
 import com.amazonaws.services.cloudwatch.model._
 import com.timeout.kamon.cloudwatch.AmazonAsync.MetricDatumBatch
+
 import kamon.{Kamon, MetricReporter, Tags}
 import kamon.metric.{MeasurementUnit, MetricDistribution, MetricValue, PeriodSnapshot}
+
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -15,13 +18,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 case class Configuration(
   nameSpace: String,
-  region: String,
+  region: Option[String],
   batchSize: Int,
   sendMetrics: Boolean,
   numThreads: Int
 )
 
-class CloudWatchReporter extends MetricReporter {
+class CloudWatchReporter private (clock: Clock) extends MetricReporter {
+
+  def this() = this(Clock.systemUTC())
+
   private val logger = LoggerFactory.getLogger(classOf[CloudWatchReporter])
 
   private val configuration: AtomicReference[Configuration] =
@@ -59,7 +65,15 @@ class CloudWatchReporter extends MetricReporter {
   private def readConfiguration(config: Config): Configuration = {
     val cloudWatchConfig = config.getConfig("kamon.cloudwatch")
     val nameSpace = cloudWatchConfig.getString("namespace")
-    val region = cloudWatchConfig.getString("region")
+
+    val region = {
+      val regionName = {
+        if (config.hasPath("region")) Option(cloudWatchConfig.getString("region"))
+        else None
+      }
+      regionName.filterNot(_.isEmpty)
+    }
+
     val batchSize = cloudWatchConfig.getInt("batch-size")
     val sendMetrics = cloudWatchConfig.getBoolean("send-metrics")
     val numThreads = cloudWatchConfig.getInt("async-threads")
@@ -104,13 +118,13 @@ class CloudWatchReporter extends MetricReporter {
     def datum(name: String, tags: Tags, unit: StandardUnit): MetricDatum = {
       val dimensions: List[Dimension] =
         tags.map {
-          case (name, value) => new Dimension().withName(name).withValue(value)
+          case (tagName, tagValue) => new Dimension().withName(tagName).withValue(tagValue)
         }.toList
 
       new MetricDatum()
         .withDimensions(dimensions.asJava)
         .withMetricName(name)
-        .withTimestamp(new Date())
+        .withTimestamp(Date.from(Instant.now(clock)))
         .withUnit(unit)
     }
 

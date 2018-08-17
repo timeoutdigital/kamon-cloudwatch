@@ -14,7 +14,7 @@ licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
 libraryDependencies ++= Seq(
   "io.kamon"      %% "kamon-core"              % "1.1.3",
-  "com.amazonaws" %  "aws-java-sdk-cloudwatch" % "1.11.384",
+  "com.amazonaws" %  "aws-java-sdk-cloudwatch" % "1.11.386",
   "org.scalatest" %% "scalatest"               % "3.0.5" % "test"
 )
 

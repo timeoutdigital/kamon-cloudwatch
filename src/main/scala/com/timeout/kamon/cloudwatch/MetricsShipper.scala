@@ -1,51 +1,54 @@
 package com.timeout.kamon.cloudwatch
 
-import java.util.concurrent.{ExecutorService, Executors}
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicReference
 
-import akka.actor.Status.Failure
-import akka.actor.{Actor, ActorLogging, Props}
-import akka.event.LoggingReceive
-import akka.pattern.pipe
-import com.amazonaws.client.builder.ExecutorFactory
 import com.amazonaws.regions.Regions
-import com.amazonaws.services.cloudwatch.model.PutMetricDataResult
 import com.amazonaws.services.cloudwatch.{AmazonCloudWatchAsync, AmazonCloudWatchAsyncClientBuilder}
-import com.timeout.kamon.cloudwatch.KamonSettings.region
 import com.timeout.kamon.cloudwatch.AmazonAsync.{MetricDatumBatch, MetricsAsyncOps}
 
-import scala.concurrent.ExecutionContext
+import org.slf4j.LoggerFactory
 
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 /**
   * Ship-and-forget. Let the future to process the actual shipment to Cloudwatch.
   */
-class MetricsShipper(implicit ec: ExecutionContext) extends Actor with ActorLogging {
+class MetricsShipper {
+  private val logger = LoggerFactory.getLogger(classOf[MetricsShipper])
 
-  // async aws client uses a thread pool that reuses a fixed number of threads
-  // operating off a shared unbounded queue.
-  implicit val client: AmazonCloudWatchAsync = AmazonCloudWatchAsyncClientBuilder
-    .standard()
-    .withRegion(
-      Option(Regions.getCurrentRegion).map(r => Regions.fromName(r.getName))
-      .getOrElse(Regions.fromName(region))
-    )
-    .withExecutorFactory(
-      new ExecutorFactory {
-        // don't use the default thread pool which configures 50 number of threads
-        override def newExecutor(): ExecutorService = Executors.newFixedThreadPool(KamonSettings.numThreads)
-      }
-    ).build()
+  // Kamon 1.0 requires to support hot-reconfiguration, which forces us to use an
+  // AtomicReference here and hope for the best
+  private val client: AtomicReference[AmazonCloudWatchAsync] = new AtomicReference()
 
-  override def receive: Receive = LoggingReceive {
-    case ShipMetrics(metrics) => metrics.put.pipeTo(self)
-    case msg: PutMetricDataResult => log.debug(s"Succeeded to push metrics to Cloudwatch: $msg")
-    case Failure(t) => log.warning(s"Failed to send metrics to Cloudwatch ${t.getMessage}")
-    case msg => log.warning(s"Unsupported message $msg received in MetricsShipper")
+  def reconfigure(configuration: Configuration): Unit = {
+    def chosenRegion: Option[Regions] = {
+      configuration.region
+        .flatMap(r => Try(Regions.fromName(r)).toOption)
+        .orElse(Option(Regions.getCurrentRegion).map(r => Regions.fromName(r.getName)))
+    }
+
+    // async aws client uses a thread pool that reuses a fixed number of threads
+    // operating off a shared unbounded queue.
+    def clientFromConfig: AmazonCloudWatchAsync = {
+      val baseBuilder = AmazonCloudWatchAsyncClientBuilder.standard()
+          .withExecutorFactory(() => Executors.newFixedThreadPool(configuration.numThreads))
+
+      chosenRegion.fold(baseBuilder)(baseBuilder.withRegion).build()
+    }
+
+    client.set(clientFromConfig)
   }
-}
 
-object MetricsShipper {
-  def props(implicit ec: ExecutionContext): Props = Props(new MetricsShipper)
-}
+  def shipMetrics(nameSpace: String, datums: MetricDatumBatch)(implicit ec: ExecutionContext): Future[Unit] = {
+    implicit val currentClient: AmazonCloudWatchAsync = client.get
+    datums.put(nameSpace)
+      .map(result => logger.debug(s"Succeeded to push metrics to Cloudwatch: $result"))
+      .recover {
+        case error: Exception =>
+          logger.warn(s"Failed to send metrics to Cloudwatch ${error.getMessage}")
+      }
+  }
 
-final case class ShipMetrics(datums: MetricDatumBatch)
+}

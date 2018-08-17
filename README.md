@@ -11,22 +11,27 @@ A simple [Kamon](https://github.com/kamon-io/Kamon) extension to ship metrics da
 
 # Installation
 - add library dependency to your build.sbt
+
 ```scala
-libraryDependencies += "com.timeout" %% "kamon-cloudwatch" % "0.0.1"
+libraryDependencies += "com.timeout" %% "kamon-cloudwatch" % "0.0.3"
 ```
 
-- load extension by Akka (optional), by default this module is set to auto-start by calling Kamon.start()
+- load the reporter by Kamon
+
 ```scala
-akka {
+kamon {
   ...
   
-  extensions = ["com.timeout.kamon.cloudwatch.KamonCloudWatch"]
+  reporters = [
+    "com.timeout.kamon.cloudwatch.CloudWatchReporter"
+  ]
 }
 ```
 
 - make sure you have AWS_PROFILE or AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY pair set correctly
 
 - add the following to your application.conf and change the fields accordingly:
+
 ```
 kamon {
   cloudwatch {
@@ -45,32 +50,11 @@ kamon {
 
     # how many threads will be assigned to the pool that does the shipment of metrics
     async-threads = 5
-
-    # Subscription patterns used to select which metrics will be pushed to CloudWatch.
-    # Please Note that, metrics collection entries entities must be activated under the kamon.metrics.filters settings.
-    # Paste the subscriptions template to your app to configure。
-    subscriptions {
-      histogram         = [ "**" ]
-      min-max-counter   = [ "**" ]
-      gauge             = [ "**" ]
-      counter           = [ "**" ]
-      trace             = [ "**" ]
-      trace-segment     = [ "**" ]
-      akka-actor        = [ 
-        "project/user/userController/**",
-        "project/user/orderController/**"
-      ]
-      akka-dispatcher   = [ "**" ]
-      akka-router       = [ "**" ]
-      system-metric     = [ "**" ]
-      http-server       = [ "**" ]
-      akka-http-server  = [ "**" ]
-    }
   }
 }
 ```
 
-- module is set to auto-start by default, you should see "Starting the Kamon CloudWatch extension" in your console output.
+- module should start when Kamon is started, you should see "Starting the Kamon CloudWatch extension" in your console output.
 
 # AWS Cloudwatch Example
 - log on to Cloudwatch, the metrics will be appearing on 'Custom namespaces' section under "Metrics" menu, i.e.:
